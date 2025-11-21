@@ -21,6 +21,9 @@
             --dark: #2c3e50;
             --text: #333;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
         }
 
         body {
@@ -120,31 +123,125 @@
             padding: 20px;
         }
         
-        .iframe-container {
-            height: 750px;
-            width: 100%;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--light);
-            overflow: hidden;
-        }
-        
-        .iframe-placeholder {
+        /* ESTILOS DO PAINEL DE ACOMPANHAMENTO BEM QUERIDA */
+        .acompanhamento-container {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--secondary);
-            font-weight: 500;
-            background-color: var(--light);
+            gap: 0;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
         }
-        
-        .iframe-placeholder i {
-            font-size: 3rem;
+
+        .acompanhamento-item {
+            background-color: white;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .acompanhamento-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .acompanhamento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .acompanhamento-cliente {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .acompanhamento-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .status-aguardando {
+            background-color: var(--warning);
+        }
+
+        .status-producao {
+            background-color: var(--secondary);
+        }
+
+        .status-realizado {
+            background-color: var(--success);
+        }
+
+        .status-parado {
+            background-color: var(--danger);
+        }
+
+        .acompanhamento-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            font-size: 0.75rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .loading i {
+            font-size: 2rem;
             margin-bottom: 15px;
         }
-        
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #78909c;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #b0bec5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-state .subtext {
+            font-size: 0.9rem;
+            color: #90a4ae;
+        }
+
         .download-area {
             display: flex;
             flex-direction: column;
@@ -202,28 +299,6 @@
         .download-btn:hover {
             background-color: #2980b9;
             transform: translateY(-3px);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #78909c;
-        }
-        
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #b0bec5;
-        }
-        
-        .empty-state p {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-        
-        .empty-state .subtext {
-            font-size: 0.9rem;
-            color: #90a4ae;
         }
         
         .floating-btn {
@@ -428,17 +503,6 @@
             font-size: 0.8rem;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--secondary);
-        }
-
-        .loading i {
-            font-size: 2rem;
-            margin-bottom: 15px;
-        }
-
         .nota-actions {
             display: flex;
             gap: 10px;
@@ -532,8 +596,8 @@
                 font-size: 0.8rem;
             }
             
-            .iframe-container {
-                height: 500px;
+            .acompanhamento-details {
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .download-item {
@@ -565,6 +629,12 @@
                 justify-content: flex-start;
             }
         }
+
+        @media (max-width: 480px) {
+            .acompanhamento-details {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -583,22 +653,19 @@
     </header>
     
     <div class="container">
+        <!-- PAINEL DE ACOMPANHAMENTO BEM QUERIDA -->
         <section class="panel-section">
             <div class="section-title">
-                <i class="fas fa-chart-line"></i>
-                Painel de Acompanhamento
+                <i class="fas fa-tasks"></i>
+                Acompanhamento de Produção
             </div>
             <div class="panel-content">
-                <iframe 
-                    src="https://www.appsheet.com/start/2c8676b4-9a22-4391-917d-c4a65ce4bc12" 
-                    class="iframe-container" 
-                    frameborder="0"
-                    allowfullscreen>
-                    <div class="iframe-placeholder">
+                <div class="acompanhamento-container" id="acompanhamentoContainer">
+                    <div class="loading">
                         <i class="fas fa-spinner fa-spin"></i>
-                        <p>Carregando painel de acompanhamento...</p>
+                        <p>Carregando acompanhamentos...</p>
                     </div>
-                </iframe>
+                </div>
             </div>
         </section>
         
@@ -680,6 +747,122 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // CONFIGURAÇÃO DO PAINEL DE ACOMPANHAMENTO BEM QUERIDA
+        const firebaseConfigAcompanhamentos = {
+            apiKey: "AIzaSyDRpSahfuooSK37x4pC9Q9fKUZrVLg7szk",
+            authDomain: "painel-de-acompanhamento-9b51a.firebaseapp.com",
+            projectId: "painel-de-acompanhamento-9b51a",
+            storageBucket: "painel-de-acompanhamento-9b51a.firebasestorage.app",
+            messagingSenderId: "441234048828",
+            appId: "1:441234048828:web:ca4fe2163aa4b469560039"
+        };
+
+        // Inicializar segundo app Firebase para acompanhamentos
+        const appAcompanhamentos = firebase.initializeApp(firebaseConfigAcompanhamentos, "acompanhamentos");
+        const dbAcompanhamentos = firebase.firestore(appAcompanhamentos);
+
+        // Função para carregar acompanhamentos da Bem Querida
+        async function carregarAcompanhamentosBemQuerida() {
+            try {
+                const querySnapshot = await dbAcompanhamentos.collection("acompanhamentos").get();
+                const acompanhamentos = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // FILTRAR APENAS OS DA MARCA "BEM QUERIDA"
+                    if (data.clienteMarca === "BEM QUERIDA") {
+                        acompanhamentos.push({
+                            id: doc.id,
+                            ...data
+                        });
+                    }
+                });
+
+                exibirAcompanhamentos(acompanhamentos);
+
+            } catch (error) {
+                console.error("Erro ao carregar acompanhamentos:", error);
+                document.getElementById('acompanhamentoContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Erro ao carregar acompanhamentos</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para exibir acompanhamentos
+        function exibirAcompanhamentos(acompanhamentos) {
+            const container = document.getElementById('acompanhamentoContainer');
+            
+            if (acompanhamentos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Nenhum acompanhamento encontrado</p>
+                        <p class="subtext">Os acompanhamentos aparecerão aqui quando forem criados</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // ORDENAR POR numeroPasso (sequência numérica)
+            acompanhamentos.sort((a, b) => {
+                const passoA = a.numeroPasso || 0;
+                const passoB = b.numeroPasso || 0;
+                return passoA - passoB;
+            });
+
+            let html = '';
+            acompanhamentos.forEach(acompanhamento => {
+                html += `
+                    <div class="acompanhamento-item">
+                        <div class="acompanhamento-header">
+                            <div class="acompanhamento-cliente">${acompanhamento.clienteMarca || 'BEM QUERIDA'}</div>
+                            <div class="acompanhamento-status status-${getStatusClass(acompanhamento.status)}">
+                                ${acompanhamento.status || 'Sem status'}
+                            </div>
+                        </div>
+                        <div class="acompanhamento-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Etapa</span>
+                                <span class="detail-value">${acompanhamento.etapa || '-'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Modelo</span>
+                                <span class="detail-value">${acompanhamento.modelo || '-'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Passo</span>
+                                <span class="detail-value">${acompanhamento.numeroPasso || '0'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Atualização</span>
+                                <span class="detail-value">${formatarDataCompacta(acompanhamento.dataAtualizacao) || '-'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Função auxiliar para obter classe CSS do status
+        function getStatusClass(status) {
+            if (!status) return "aguardando";
+            if (status === "Aguardando") return "aguardando";
+            if (status === "Em produção") return "producao";
+            if (status === "Realizado") return "realizado";
+            return "parado";
+        }
+
+        // Formatar data de forma compacta
+        function formatarDataCompacta(dataString) {
+            if (!dataString) return '';
+            return dataString.split(' ')[0];
+        }
 
         // Função para calcular o valor total da nota
         function calcularValorTotal(nota) {
@@ -1004,23 +1187,14 @@
                 });
         }
 
-        // Carregar notas quando a página carregar
+        // Carregar tudo quando a página carregar
         document.addEventListener('DOMContentLoaded', function() {
+            carregarAcompanhamentosBemQuerida();
             carregarNotasBemQuerida();
-            
-            const iframe = document.querySelector('.iframe-container');
-            iframe.addEventListener('load', function() {
-                console.log('Painel AppSheet carregado com sucesso!');
-            });
-            
-            iframe.addEventListener('error', function() {
-                console.error('Erro ao carregar o painel AppSheet');
-                const placeholder = document.querySelector('.iframe-placeholder');
-                placeholder.innerHTML = '<i class="fas fa-exclamation-triangle"></i><p>Erro ao carregar o painel. Verifique a conexão.</p>';
-            });
         });
 
         // Atualizar automaticamente a cada 30 segundos
+        setInterval(carregarAcompanhamentosBemQuerida, 30000);
         setInterval(carregarNotasBemQuerida, 30000);
     </script>
 </body>
