@@ -1099,7 +1099,7 @@
         // Função para carregar e separar as notas
         function carregarNotasBemQuerida() {
             db.collection("invoices")
-                .where("clientName", "==", "Bem Querida")
+                .where("clientName", "==", "BEM QUERIDA")  // ALTERADO: Buscar por "BEM QUERIDA" em maiúsculas
                 .get()
                 .then((querySnapshot) => {
                     if (querySnapshot.empty) {
