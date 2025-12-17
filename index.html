@@ -123,125 +123,7 @@
             padding: 20px;
         }
         
-        /* ESTILOS DO PAINEL DE ACOMPANHAMENTO BEM QUERIDA */
-        .acompanhamento-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            max-height: 600px;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-        }
-
-        .acompanhamento-item {
-            background-color: white;
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .acompanhamento-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .acompanhamento-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .acompanhamento-cliente {
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 0.9rem;
-        }
-
-        .acompanhamento-status {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            color: white;
-            white-space: nowrap;
-        }
-
-        .status-aguardando {
-            background-color: var(--warning);
-        }
-
-        .status-producao {
-            background-color: var(--secondary);
-        }
-
-        .status-realizado {
-            background-color: var(--success);
-        }
-
-        .status-parado {
-            background-color: var(--danger);
-        }
-
-        .acompanhamento-details {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            font-size: 0.75rem;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-label {
-            font-size: 0.7rem;
-            color: #666;
-            margin-bottom: 2px;
-        }
-
-        .detail-value {
-            font-weight: 500;
-            font-size: 0.75rem;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--primary);
-        }
-
-        .loading i {
-            font-size: 2rem;
-            margin-bottom: 15px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #78909c;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #b0bec5;
-        }
-
-        .empty-state p {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-
-        .empty-state .subtext {
-            font-size: 0.9rem;
-            color: #90a4ae;
-        }
-
+        /* NOTA DE COBRANÇA */
         .download-area {
             display: flex;
             flex-direction: column;
@@ -572,6 +454,339 @@
             border-left: 3px solid var(--secondary);
         }
 
+        /* ESTILOS DO PAINEL DE ACOMPANHAMENTO (NOVOS) */
+        .quick-view-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0; /* SEM ESPAÇO ENTRE OS ITENS */
+        }
+
+        .quick-view-item {
+            background-color: white;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee; /* Linha divisória sutil */
+            transition: all 0.2s ease;
+            min-height: 60px; /* Altura bem reduzida */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .quick-view-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .quick-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .quick-view-cliente {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        .quick-view-status {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.6rem;
+            font-weight: bold;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .status-aguardando {
+            background-color: var(--warning);
+        }
+
+        .status-producao {
+            background-color: var(--secondary);
+        }
+
+        .status-realizado {
+            background-color: var(--success);
+        }
+
+        .status-parado {
+            background-color: var(--danger);
+        }
+
+        .quick-view-details-compact {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            font-size: 0.65rem;
+        }
+
+        .detail-compact {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label-compact {
+            font-size: 0.6rem;
+            color: #666;
+            margin-bottom: 1px;
+        }
+
+        .detail-value-compact {
+            font-weight: 500;
+            font-size: 0.65rem;
+        }
+
+        .quick-view-actions {
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .view-btn {
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+
+        .view-btn:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        /* Modal de visualização completa */
+        .modal-visualizacao {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+        }
+        
+        .modal-visualizacao-content {
+            position: relative;
+            width: 95%;
+            max-width: 600px;
+            margin: 5% auto;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            padding: 15px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 2001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-title {
+            margin-bottom: 12px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--secondary);
+            padding-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Informações de visualização */
+        .info-section {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-section h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--secondary);
+            padding-bottom: 4px;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 6px;
+            font-size: 0.75rem;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--primary);
+            min-width: 120px;
+        }
+        
+        .info-value {
+            color: var(--text);
+            flex: 1;
+        }
+        
+        .info-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        /* Lista de etapas na visualização */
+        .etapas-lista-visualizacao {
+            margin-top: 10px;
+        }
+        
+        .etapa-item-visualizacao {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 6px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #ddd;
+        }
+        
+        .etapa-item-visualizacao.aguardando {
+            border-left-color: var(--warning);
+        }
+        
+        .etapa-item-visualizacao.producao {
+            border-left-color: var(--secondary);
+        }
+        
+        .etapa-item-visualizacao.realizado {
+            border-left-color: var(--success);
+        }
+        
+        .etapa-item-visualizacao.parado {
+            border-left-color: var(--danger);
+        }
+        
+        .etapa-numero-visualizacao {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.7rem;
+            min-width: 25px;
+            text-align: center;
+        }
+        
+        .etapa-nome-visualizacao {
+            flex: 1;
+            font-size: 0.75rem;
+            color: var(--text);
+        }
+        
+        .etapa-status-visualizacao {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: white;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .status-aguardando-bg {
+            background-color: var(--warning);
+        }
+        
+        .status-producao-bg {
+            background-color: var(--secondary);
+        }
+        
+        .status-realizado-bg {
+            background-color: var(--success);
+        }
+        
+        .status-parado-bg {
+            background-color: var(--danger);
+        }
+        
+        /* Barra de progresso */
+        .progress-container {
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 0.7rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success);
+            transition: width 0.3s ease;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #78909c;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #b0bec5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-state .subtext {
+            font-size: 0.9rem;
+            color: #90a4ae;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 0 10px;
@@ -596,7 +811,7 @@
                 font-size: 0.8rem;
             }
             
-            .acompanhamento-details {
+            .quick-view-details-compact {
                 grid-template-columns: repeat(2, 1fr);
             }
             
@@ -628,11 +843,36 @@
             .nota-actions {
                 justify-content: flex-start;
             }
+            
+            .modal-visualizacao-content {
+                width: 90%;
+                margin: 10% auto;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                margin-bottom: 8px;
+            }
+            
+            .info-label {
+                min-width: auto;
+                margin-bottom: 2px;
+            }
         }
 
         @media (max-width: 480px) {
-            .acompanhamento-details {
+            .quick-view-details-compact {
                 grid-template-columns: 1fr;
+            }
+            
+            .etapa-item-visualizacao {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .etapa-status-visualizacao {
+                align-self: flex-start;
             }
         }
     </style>
@@ -653,14 +893,14 @@
     </header>
     
     <div class="container">
-        <!-- PAINEL DE ACOMPANHAMENTO BEM QUERIDA -->
+        <!-- PAINEL DE ACOMPANHAMENTO BEM QUERIDA (NOVO) -->
         <section class="panel-section">
             <div class="section-title">
                 <i class="fas fa-tasks"></i>
                 Acompanhamento de Produção
             </div>
             <div class="panel-content">
-                <div class="acompanhamento-container" id="acompanhamentoContainer">
+                <div class="quick-view-container" id="quickViewContainer">
                     <div class="loading">
                         <i class="fas fa-spinner fa-spin"></i>
                         <p>Carregando acompanhamentos...</p>
@@ -719,6 +959,18 @@
     <!-- Container oculto para gerar PNG -->
     <div id="nota-print" class="nota-print"></div>
     
+    <!-- Modal para visualização completa -->
+    <div id="visualizacaoModal" class="modal-visualizacao">
+        <div class="modal-visualizacao-content">
+            <button class="close-btn" onclick="fecharModalVisualizacao()">×</button>
+            <h3 class="modal-title">Visualização Completa</h3>
+            
+            <div id="conteudoVisualizacao">
+                <!-- Conteúdo será carregado dinamicamente -->
+            </div>
+        </div>
+    </div>
+    
     <a href="https://call.doorvi.co/en/home/a582975f330bac0b10d743d0931107300a5a0ed05c06a40e1efce2c9961b671bc01f98b52109d1d0eff5010ed23dcf158baaef6c5f8cfde913c9f7c232ce47ba" class="floating-btn" target="_blank">
         <i class="fas fa-bell"></i>
     </a>
@@ -762,29 +1014,32 @@
         const appAcompanhamentos = firebase.initializeApp(firebaseConfigAcompanhamentos, "acompanhamentos");
         const dbAcompanhamentos = firebase.firestore(appAcompanhamentos);
 
+        // Variáveis globais para acompanhamentos
+        let todosAcompanhamentos = [];
+
         // Função para carregar acompanhamentos da Bem Querida
         async function carregarAcompanhamentosBemQuerida() {
             try {
                 const querySnapshot = await dbAcompanhamentos.collection("acompanhamentos").get();
-                const acompanhamentos = [];
+                todosAcompanhamentos = [];
                 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     // FILTRAR APENAS OS DA MARCA "BEM QUERIDA"
-                    if (data.clienteMarca === "BEM QUERIDA") {
-                        acompanhamentos.push({
+                    if (data.clienteMarca && data.clienteMarca.toUpperCase() === "BEM QUERIDA") {
+                        todosAcompanhamentos.push({
                             id: doc.id,
                             ...data
                         });
                     }
                 });
 
-                exibirAcompanhamentos(acompanhamentos);
+                exibirAcompanhamentos(todosAcompanhamentos);
 
             } catch (error) {
                 console.error("Erro ao carregar acompanhamentos:", error);
-                document.getElementById('acompanhamentoContainer').innerHTML = `
-                    <div class="empty-state">
+                document.getElementById('quickViewContainer').innerHTML = `
+                    <div class="loading">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Erro ao carregar acompanhamentos</p>
                     </div>
@@ -794,53 +1049,60 @@
 
         // Função para exibir acompanhamentos
         function exibirAcompanhamentos(acompanhamentos) {
-            const container = document.getElementById('acompanhamentoContainer');
+            const container = document.getElementById('quickViewContainer');
             
             if (acompanhamentos.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="loading">
                         <i class="fas fa-inbox"></i>
-                        <p>Nenhum acompanhamento encontrado</p>
-                        <p class="subtext">Os acompanhamentos aparecerão aqui quando forem criados</p>
+                        <p>Nenhum acompanhamento encontrado para a Bem Querida</p>
                     </div>
                 `;
                 return;
             }
 
-            // ORDENAR POR numeroPasso (sequência numérica)
-            acompanhamentos.sort((a, b) => {
-                const passoA = a.numeroPasso || 0;
-                const passoB = b.numeroPasso || 0;
-                return passoA - passoB;
-            });
-
             let html = '';
             acompanhamentos.forEach(acompanhamento => {
+                // Calcular progresso das etapas
+                let etapasRealizadas = 0;
+                let totalEtapas = 0;
+                if (acompanhamento.etapasStatus) {
+                    totalEtapas = Object.keys(acompanhamento.etapasStatus).length;
+                    etapasRealizadas = Object.values(acompanhamento.etapasStatus).filter(status => status === 'Realizado').length;
+                }
+                
+                const progresso = totalEtapas > 0 ? Math.round((etapasRealizadas / totalEtapas) * 100) : 0;
+                
                 html += `
-                    <div class="acompanhamento-item">
-                        <div class="acompanhamento-header">
-                            <div class="acompanhamento-cliente">${acompanhamento.clienteMarca || 'BEM QUERIDA'}</div>
-                            <div class="acompanhamento-status status-${getStatusClass(acompanhamento.status)}">
-                                ${acompanhamento.status || 'Sem status'}
+                    <div class="quick-view-item">
+                        <div class="quick-view-header">
+                            <div class="quick-view-cliente">${acompanhamento.clienteMarca || 'BEM QUERIDA'}</div>
+                            <div class="quick-view-status status-${getStatusClass(acompanhamento.statusGeral)}">
+                                ${acompanhamento.statusGeral || 'Sem status'}
                             </div>
                         </div>
-                        <div class="acompanhamento-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Etapa</span>
-                                <span class="detail-value">${acompanhamento.etapa || '-'}</span>
+                        <div class="quick-view-details-compact">
+                            <div class="detail-compact">
+                                <span class="detail-label-compact">Modelo</span>
+                                <span class="detail-value-compact">${acompanhamento.modeloNome || '-'}</span>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Modelo</span>
-                                <span class="detail-value">${acompanhamento.modelo || '-'}</span>
+                            <div class="detail-compact">
+                                <span class="detail-label-compact">Etapas</span>
+                                <span class="detail-value-compact">${etapasRealizadas}/${totalEtapas}</span>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Passo</span>
-                                <span class="detail-value">${acompanhamento.numeroPasso || '0'}</span>
+                            <div class="detail-compact">
+                                <span class="detail-label-compact">Progresso</span>
+                                <span class="detail-value-compact">${progresso}%</span>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Atualização</span>
-                                <span class="detail-value">${formatarDataCompacta(acompanhamento.dataAtualizacao) || '-'}</span>
+                            <div class="detail-compact">
+                                <span class="detail-label-compact">Criação</span>
+                                <span class="detail-value-compact">${acompanhamento.dataCriacao ? acompanhamento.dataCriacao.split(' ')[0] : '-'}</span>
                             </div>
+                        </div>
+                        <div class="quick-view-actions">
+                            <button class="action-btn view-btn" onclick="abrirModalVisualizacao('${acompanhamento.id}')">
+                                <i class="fas fa-eye"></i> Visualizar
+                            </button>
                         </div>
                     </div>
                 `;
@@ -858,10 +1120,124 @@
             return "parado";
         }
 
-        // Formatar data de forma compacta
-        function formatarDataCompacta(dataString) {
-            if (!dataString) return '';
-            return dataString.split(' ')[0];
+        // Função para abrir modal de visualização
+        window.abrirModalVisualizacao = function(id) {
+            const acompanhamento = todosAcompanhamentos.find(a => a.id === id);
+            if (!acompanhamento) return;
+            
+            document.getElementById('visualizacaoModal').style.display = "block";
+            exibirConteudoVisualizacao(acompanhamento);
+        };
+
+        // Função para fechar modal de visualização
+        window.fecharModalVisualizacao = function() {
+            document.getElementById('visualizacaoModal').style.display = "none";
+        };
+
+        // Exibir conteúdo na modal de visualização
+        function exibirConteudoVisualizacao(acompanhamento) {
+            // Calcular progresso das etapas
+            let etapasRealizadas = 0;
+            let totalEtapas = 0;
+            if (acompanhamento.etapasStatus) {
+                totalEtapas = Object.keys(acompanhamento.etapasStatus).length;
+                etapasRealizadas = Object.values(acompanhamento.etapasStatus).filter(status => status === 'Realizado').length;
+            }
+            
+            const progresso = totalEtapas > 0 ? Math.round((etapasRealizadas / totalEtapas) * 100) : 0;
+            
+            // Função para obter texto do status
+            function getStatusText(status) {
+                if (!status) return "Aguardando";
+                return status;
+            }
+            
+            // Função para obter classe de background do status
+            function getStatusBgClass(status) {
+                if (!status) return "status-aguardando-bg";
+                if (status === "Aguardando") return "status-aguardando-bg";
+                if (status === "Em produção") return "status-producao-bg";
+                if (status === "Realizado") return "status-realizado-bg";
+                return "status-parado-bg";
+            }
+            
+            document.getElementById('conteudoVisualizacao').innerHTML = `
+                <div class="info-section">
+                    <h4>Informações do Cliente</h4>
+                    <div class="info-row">
+                        <div class="info-label">Cliente (Marca):</div>
+                        <div class="info-value">${acompanhamento.clienteMarca || 'BEM QUERIDA'}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Data de Criação:</div>
+                        <div class="info-value">${acompanhamento.dataCriacao || 'Não informada'}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Última Atualização:</div>
+                        <div class="info-value">${acompanhamento.dataAtualizacao || 'Não informada'}</div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h4>Informações do Produto</h4>
+                    <div class="info-row">
+                        <div class="info-label">Modelo do Produto:</div>
+                        <div class="info-value">${acompanhamento.modeloNome || 'Não informado'}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Status Geral:</div>
+                        <div class="info-value">
+                            <span class="info-status status-${getStatusClass(acompanhamento.statusGeral)}">
+                                ${getStatusText(acompanhamento.statusGeral)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Observações:</div>
+                        <div class="info-value">${acompanhamento.observacoes || 'Nenhuma observação'}</div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h4>Progresso do Produto</h4>
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Progresso Geral</span>
+                            <span>${etapasRealizadas}/${totalEtapas} etapas (${progresso}%)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progresso}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h4>Etapas do Produto</h4>
+                    <div class="etapas-lista-visualizacao" id="listaEtapasVisualizacao">
+                        ${acompanhamento.etapas && acompanhamento.etapas.length > 0 ? 
+                            acompanhamento.etapas.map((etapa, index) => {
+                                const status = acompanhamento.etapasStatus ? acompanhamento.etapasStatus[index] : 'Aguardando';
+                                return `
+                                    <div class="etapa-item-visualizacao ${getStatusClass(status)}">
+                                        <div class="etapa-numero-visualizacao">${index + 1}</div>
+                                        <div class="etapa-nome-visualizacao">${etapa}</div>
+                                        <div class="etapa-status-visualizacao ${getStatusBgClass(status)}">
+                                            ${getStatusText(status)}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')
+                            : '<div class="loading"><p>Nenhuma etapa cadastrada</p></div>'
+                        }
+                    </div>
+                </div>
+                
+                <div class="form-actions" style="display: flex; justify-content: center; margin-top: 20px;">
+                    <button type="button" class="btn-download" onclick="fecharModalVisualizacao()" style="background-color: var(--secondary);">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                </div>
+            `;
         }
 
         // Função para calcular o valor total da nota
