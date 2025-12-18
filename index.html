@@ -458,15 +458,15 @@
         .quick-view-container {
             display: flex;
             flex-direction: column;
-            gap: 0; /* SEM ESPAÇO ENTRE OS ITENS */
+            gap: 0;
         }
 
         .quick-view-item {
             background-color: white;
             padding: 8px 10px;
-            border-bottom: 1px solid #eee; /* Linha divisória sutil */
+            border-bottom: 1px solid #eee;
             transition: all 0.2s ease;
-            min-height: 60px; /* Altura bem reduzida */
+            min-height: 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -986,7 +986,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-        // Configuração do Firebase
+        // ==============================================
+        // CONFIGURAÇÃO ÚNICA DO FIREBASE (CORRIGIDO)
+        // ==============================================
         const firebaseConfig = {
             apiKey: "AIzaSyChK3nnmmyJ-jxwIgRMkmiJ-toonT6oQCA",
             authDomain: "gerador-de-notas-e591f.firebaseapp.com",
@@ -996,31 +998,22 @@
             appId: "1:700565084876:web:f69a2742868da5255f8069"
         };
 
-        // Inicializar Firebase
+        // Inicializar Firebase APENAS UMA VEZ
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // CONFIGURAÇÃO DO PAINEL DE ACOMPANHAMENTO BEM QUERIDA
-        const firebaseConfigAcompanhamentos = {
-            apiKey: "AIzaSyDRpSahfuooSK37x4pC9Q9fKUZrVLg7szk",
-            authDomain: "painel-de-acompanhamento-9b51a.firebaseapp.com",
-            projectId: "painel-de-acompanhamento-9b51a",
-            storageBucket: "painel-de-acompanhamento-9b51a.firebasestorage.app",
-            messagingSenderId: "441234048828",
-            appId: "1:441234048828:web:ca4fe2163aa4b469560039"
-        };
-
-        // Inicializar segundo app Firebase para acompanhamentos
-        const appAcompanhamentos = firebase.initializeApp(firebaseConfigAcompanhamentos, "acompanhamentos");
-        const dbAcompanhamentos = firebase.firestore(appAcompanhamentos);
-
-        // Variáveis globais para acompanhamentos
+        // ==============================================
+        // VARIÁVEIS GLOBAIS
+        // ==============================================
         let todosAcompanhamentos = [];
 
-        // Função para carregar acompanhamentos da Bem Querida
+        // ==============================================
+        // FUNÇÕES DO PAINEL DE ACOMPANHAMENTO
+        // ==============================================
         async function carregarAcompanhamentosBemQuerida() {
             try {
-                const querySnapshot = await dbAcompanhamentos.collection("acompanhamentos").get();
+                // CORREÇÃO: Usar db.collection() diretamente
+                const querySnapshot = await db.collection("acompanhamentos").get();
                 todosAcompanhamentos = [];
                 
                 querySnapshot.forEach((doc) => {
@@ -1042,20 +1035,21 @@
                     <div class="loading">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Erro ao carregar acompanhamentos</p>
+                        <p class="subtext">Verifique a conexão com o Firebase</p>
                     </div>
                 `;
             }
         }
 
-        // Função para exibir acompanhamentos
         function exibirAcompanhamentos(acompanhamentos) {
             const container = document.getElementById('quickViewContainer');
             
             if (acompanhamentos.length === 0) {
                 container.innerHTML = `
-                    <div class="loading">
+                    <div class="empty-state">
                         <i class="fas fa-inbox"></i>
                         <p>Nenhum acompanhamento encontrado para a Bem Querida</p>
+                        <p class="subtext">Os acompanhamentos aparecerão aqui quando cadastrados</p>
                     </div>
                 `;
                 return;
@@ -1111,7 +1105,6 @@
             container.innerHTML = html;
         }
 
-        // Função auxiliar para obter classe CSS do status
         function getStatusClass(status) {
             if (!status) return "aguardando";
             if (status === "Aguardando") return "aguardando";
@@ -1120,7 +1113,9 @@
             return "parado";
         }
 
-        // Função para abrir modal de visualização
+        // ==============================================
+        // FUNÇÕES DO MODAL DE VISUALIZAÇÃO
+        // ==============================================
         window.abrirModalVisualizacao = function(id) {
             const acompanhamento = todosAcompanhamentos.find(a => a.id === id);
             if (!acompanhamento) return;
@@ -1129,14 +1124,11 @@
             exibirConteudoVisualizacao(acompanhamento);
         };
 
-        // Função para fechar modal de visualização
         window.fecharModalVisualizacao = function() {
             document.getElementById('visualizacaoModal').style.display = "none";
         };
 
-        // Exibir conteúdo na modal de visualização
         function exibirConteudoVisualizacao(acompanhamento) {
-            // Calcular progresso das etapas
             let etapasRealizadas = 0;
             let totalEtapas = 0;
             if (acompanhamento.etapasStatus) {
@@ -1146,13 +1138,11 @@
             
             const progresso = totalEtapas > 0 ? Math.round((etapasRealizadas / totalEtapas) * 100) : 0;
             
-            // Função para obter texto do status
             function getStatusText(status) {
                 if (!status) return "Aguardando";
                 return status;
             }
             
-            // Função para obter classe de background do status
             function getStatusBgClass(status) {
                 if (!status) return "status-aguardando-bg";
                 if (status === "Aguardando") return "status-aguardando-bg";
@@ -1240,7 +1230,9 @@
             `;
         }
 
-        // Função para calcular o valor total da nota
+        // ==============================================
+        // FUNÇÕES DAS NOTAS DE COBRANÇA
+        // ==============================================
         function calcularValorTotal(nota) {
             if (nota.total !== undefined) {
                 return parseFloat(nota.total);
@@ -1259,13 +1251,11 @@
             return total - desconto;
         }
 
-        // Função para determinar o status da nota
         function determinarStatus(nota) {
             if (nota.status) return nota.status.toLowerCase();
             return 'pendente';
         }
 
-        // Função para criar o card da nota (VERSÃO COMPACTA)
         function criarCardNota(nota) {
             const status = determinarStatus(nota);
             const dataFormatada = nota.date ? new Date(nota.date).toLocaleDateString('pt-BR') : 'Data não informada';
@@ -1343,7 +1333,6 @@
             `;
         }
 
-        // Função para criar conteúdo para impressão (sem botão)
         function criarConteudoPrint(nota) {
             const status = determinarStatus(nota);
             const dataFormatada = nota.date ? new Date(nota.date).toLocaleDateString('pt-BR') : 'Data não informada';
@@ -1409,7 +1398,6 @@
             `;
         }
 
-        // Função para expandir/recolher detalhes
         function toggleNotaDetails(notaId) {
             const details = document.getElementById(`details-${notaId}`);
             const toggle = document.querySelector(`[data-nota-id="${notaId}"] .nota-toggle`);
@@ -1418,9 +1406,7 @@
             toggle.classList.toggle('rotated');
         }
 
-        // Função para gerar nome do arquivo
         function gerarNomeArquivo(clientName, valorTotal, data) {
-            // Remove caracteres especiais e espaços
             const nomeLimpo = clientName.replace(/[^a-zA-Z0-9]/g, '_');
             const dataLimpa = data.replace(/\//g, '-');
             const valorLimpo = valorTotal.toFixed(2).replace('.', '_');
@@ -1428,9 +1414,7 @@
             return `nota_${nomeLimpo}_${valorLimpo}_${dataLimpa}.png`;
         }
 
-        // Função para gerar PNG da nota
         function gerarPNG(notaId, clientName, valorTotal, dataFormatada) {
-            // Buscar os dados completos da nota
             db.collection("invoices")
                 .where("id", "==", notaId)
                 .get()
@@ -1438,25 +1422,21 @@
                     if (!querySnapshot.empty) {
                         const nota = querySnapshot.docs[0].data();
                         
-                        // Criar conteúdo para impressão
                         const printContainer = document.getElementById('nota-print');
                         printContainer.innerHTML = criarConteudoPrint(nota);
                         printContainer.style.display = 'block';
 
-                        // Gerar PNG
                         html2canvas(printContainer, {
                             scale: 2,
                             backgroundColor: '#ffffff',
                             useCORS: true
                         }).then(canvas => {
-                            // Criar link de download
                             const link = document.createElement('a');
                             const fileName = gerarNomeArquivo(clientName, valorTotal, dataFormatada);
                             link.download = fileName;
                             link.href = canvas.toDataURL('image/png');
                             link.click();
                             
-                            // Limpar container
                             printContainer.innerHTML = '';
                             printContainer.style.display = 'none';
                         }).catch(error => {
@@ -1472,10 +1452,12 @@
                 });
         }
 
-        // Função para carregar e separar as notas
+        // ==============================================
+        // CARREGAR NOTAS DO FIREBASE
+        // ==============================================
         function carregarNotasBemQuerida() {
             db.collection("invoices")
-                .where("clientName", "==", "BEM QUERIDA")  // ALTERADO: Buscar por "BEM QUERIDA" em maiúsculas
+                .where("clientName", "==", "BEM QUERIDA")
                 .get()
                 .then((querySnapshot) => {
                     if (querySnapshot.empty) {
@@ -1508,11 +1490,9 @@
                         }
                     });
 
-                    // Ordenar por data (mais recente primeiro)
                     notasPendentes.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
                     notasHistorico.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-                    // Exibir nota atual (pendente)
                     if (notasPendentes.length > 0) {
                         let htmlPendentes = '';
                         notasPendentes.forEach(nota => {
@@ -1529,7 +1509,6 @@
                         `;
                     }
 
-                    // Exibir histórico (pago e cancelado)
                     if (notasHistorico.length > 0) {
                         let htmlHistorico = '';
                         notasHistorico.forEach(nota => {
@@ -1552,26 +1531,41 @@
                         <div class="empty-state">
                             <i class="fas fa-exclamation-triangle"></i>
                             <p>Erro ao carregar notas</p>
+                            <p class="subtext">${error.message}</p>
                         </div>
                     `;
                     document.getElementById('historico-notas').innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-exclamation-triangle"></i>
                             <p>Erro ao carregar histórico</p>
+                            <p class="subtext">${error.message}</p>
                         </div>
                     `;
                 });
         }
 
-        // Carregar tudo quando a página carregar
+        // ==============================================
+        // INICIALIZAÇÃO DA APLICAÇÃO
+        // ==============================================
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Aplicação iniciada - Costur Confecções Bem Querida');
+            
+            // Carregar dados inicialmente
             carregarAcompanhamentosBemQuerida();
             carregarNotasBemQuerida();
+            
+            // Configurar atualizações automáticas
+            setInterval(carregarAcompanhamentosBemQuerida, 30000);
+            setInterval(carregarNotasBemQuerida, 30000);
+            
+            // Fechar modal ao clicar fora
+            window.onclick = function(event) {
+                const modal = document.getElementById('visualizacaoModal');
+                if (event.target == modal) {
+                    fecharModalVisualizacao();
+                }
+            };
         });
-
-        // Atualizar automaticamente a cada 30 segundos
-        setInterval(carregarAcompanhamentosBemQuerida, 30000);
-        setInterval(carregarNotasBemQuerida, 30000);
     </script>
 </body>
 </html>
