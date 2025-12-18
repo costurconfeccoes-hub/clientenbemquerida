@@ -1,4 +1,3 @@
-f
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -988,9 +987,11 @@ f
 
     <script>
         // ==============================================
-        // CONFIGURAÇÃO ÚNICA DO FIREBASE (CORRIGIDO)
+        // CONFIGURAÇÃO DOS DOIS BANCOS DE DADOS FIREBASE
         // ==============================================
-        const firebaseConfig = {
+
+        // 1º BANCO DE DADOS: Notas de Cobrança
+        const firebaseConfigNotas = {
             apiKey: "AIzaSyChK3nnmmyJ-jxwIgRMkmiJ-toonT6oQCA",
             authDomain: "gerador-de-notas-e591f.firebaseapp.com",
             projectId: "gerador-de-notas-e591f",
@@ -999,9 +1000,27 @@ f
             appId: "1:700565084876:web:f69a2742868da5255f8069"
         };
 
-        // Inicializar Firebase APENAS UMA VEZ
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // 2º BANCO DE DADOS: Acompanhamentos de Produção
+        const firebaseConfigAcompanhamentos = {
+            apiKey: "AIzaSyDRpSahfuooSK37x4pC9Q9fKUZrVLg7szk",
+            authDomain: "painel-de-acompanhamento-9b51a.firebaseapp.com",
+            projectId: "painel-de-acompanhamento-9b51a",
+            storageBucket: "painel-de-acompanhamento-9b51a.firebasestorage.app",
+            messagingSenderId: "441234048828",
+            appId: "1:441234048828:web:ca4fe2163aa4b469560039"
+        };
+
+        // ==============================================
+        // INICIALIZAR OS DOIS APPS DO FIREBASE
+        // ==============================================
+
+        // App PRINCIPAL (default) - para notas de cobrança
+        const appNotas = firebase.initializeApp(firebaseConfigNotas, "notas");
+        const dbNotas = firebase.firestore(appNotas);
+
+        // App SECUNDÁRIO - para acompanhamentos de produção
+        const appAcompanhamentos = firebase.initializeApp(firebaseConfigAcompanhamentos, "acompanhamentos");
+        const dbAcompanhamentos = firebase.firestore(appAcompanhamentos);
 
         // ==============================================
         // VARIÁVEIS GLOBAIS
@@ -1009,12 +1028,12 @@ f
         let todosAcompanhamentos = [];
 
         // ==============================================
-        // FUNÇÕES DO PAINEL DE ACOMPANHAMENTO
+        // FUNÇÕES DO PAINEL DE ACOMPANHAMENTO (BANCO 2)
         // ==============================================
         async function carregarAcompanhamentosBemQuerida() {
             try {
-                // CORREÇÃO: Usar db.collection() diretamente
-                const querySnapshot = await db.collection("acompanhamentos").get();
+                // Usa o SEGUNDO banco de dados (acompanhamentos)
+                const querySnapshot = await dbAcompanhamentos.collection("acompanhamentos").get();
                 todosAcompanhamentos = [];
                 
                 querySnapshot.forEach((doc) => {
@@ -1036,7 +1055,7 @@ f
                     <div class="loading">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Erro ao carregar acompanhamentos</p>
-                        <p class="subtext">Verifique a conexão com o Firebase</p>
+                        <p class="subtext">${error.message}</p>
                     </div>
                 `;
             }
@@ -1232,7 +1251,7 @@ f
         }
 
         // ==============================================
-        // FUNÇÕES DAS NOTAS DE COBRANÇA
+        // FUNÇÕES DAS NOTAS DE COBRANÇA (BANCO 1)
         // ==============================================
         function calcularValorTotal(nota) {
             if (nota.total !== undefined) {
@@ -1416,7 +1435,8 @@ f
         }
 
         function gerarPNG(notaId, clientName, valorTotal, dataFormatada) {
-            db.collection("invoices")
+            // Usa o PRIMEIRO banco de dados (notas)
+            dbNotas.collection("invoices")
                 .where("id", "==", notaId)
                 .get()
                 .then((querySnapshot) => {
@@ -1454,10 +1474,11 @@ f
         }
 
         // ==============================================
-        // CARREGAR NOTAS DO FIREBASE
+        // CARREGAR NOTAS DO FIREBASE (BANCO 1)
         // ==============================================
         function carregarNotasBemQuerida() {
-            db.collection("invoices")
+            // Usa o PRIMEIRO banco de dados (notas)
+            dbNotas.collection("invoices")
                 .where("clientName", "==", "BEM QUERIDA")
                 .get()
                 .then((querySnapshot) => {
@@ -1549,7 +1570,10 @@ f
         // INICIALIZAÇÃO DA APLICAÇÃO
         // ==============================================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Aplicação iniciada - Costur Confecções Bem Querida');
+            console.log('🚀 Aplicação iniciada - Costur Confecções Bem Querida');
+            console.log('✅ Conectado a 2 bancos de dados Firebase');
+            console.log('📊 Banco 1: Notas de Cobrança');
+            console.log('📈 Banco 2: Acompanhamentos de Produção');
             
             // Carregar dados inicialmente
             carregarAcompanhamentosBemQuerida();
