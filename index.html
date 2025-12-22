@@ -892,6 +892,707 @@
         </div>
     </header>
     
+
+    <title>Calendário e Histórico de Agendamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --text: #333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --admin-color: #8e44ad;
+            --completed-color: #27ae60;
+            --in-production-color: #3498db;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card h2 i {
+            margin-right: 10px;
+        }
+        
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        .calendar {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .calendar-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .calendar-body {
+            padding: 15px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        
+        .calendar-day {
+            text-align: center;
+            padding: 10px 5px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #000;
+        }
+        
+        .calendar-day.header {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            color: var(--dark);
+        }
+        
+        .calendar-day.available {
+            background-color: var(--success-color);
+            color: white;
+            cursor: pointer;
+        }
+        
+        .calendar-day.available:hover {
+            background-color: #27ae60;
+            transform: scale(1.05);
+        }
+        
+        .calendar-day.unavailable {
+            background-color: #eee;
+            color: #999;
+        }
+        
+        .calendar-day.past-day {
+            background-color: #ccc;
+            color: #666;
+            cursor: default;
+        }
+        
+        .calendar-day.past-day.booked {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .calendar-day.booked {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .calendar-day.today {
+            border: 2px solid var(--secondary);
+            font-weight: bold;
+            background-color: #fff9e6;
+            color: #000;
+        }
+        
+        .appointments-list {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        
+        .appointment-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .appointment-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .appointment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .appointment-details {
+            flex-grow: 1;
+        }
+        
+        .appointment-dates {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .appointment-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-booked {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .status-in-production {
+            background-color: var(--in-production-color);
+            color: white;
+        }
+        
+        .status-completed {
+            background-color: var(--completed-color);
+            color: white;
+        }
+        
+        .status-cancelled {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            padding: 30px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 992px) {
+            .calendar-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .appointment-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .appointment-actions {
+                margin-top: 15px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card {
+                padding: 15px;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+            
+            .calendar-day {
+                padding: 8px 3px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-calendar-alt"></i> Calendário de Disponibilidade</h2>
+            <div class="calendar-container">
+                <div class="calendar">
+                    <div class="calendar-header" id="current-month">Carregando...</div>
+                    <div class="calendar-body">
+                        <div class="calendar-grid" id="calendar-days">
+                            <!-- Dias serão gerados via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>Legenda</h3>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--success-color);"></div>
+                            <span>Disponível para agendamento</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--secondary);"></div>
+                            <span>Período ocupado (BEM QUERIDA)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #ccc;"></div>
+                            <span>Dia que já passou</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="border: 2px solid var(--secondary); background-color: #fff9e6;"></div>
+                            <span>Dia atual</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button id="prev-month">Mês Anterior</button>
+                        <button id="next-month" style="margin-top: 10px;">Próximo Mês</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-list"></i> Histórico de Agendamentos</h2>
+            
+            <div class="appointments-list" id="appointments-list">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando agendamentos da BEM QUERIDA...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================
+        // CONFIGURAÇÃO DO FIREBASE
+        // ============================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAc1iUDZEjyDOtrY9UT_idP5_TGODIsc9E",
+            authDomain: "costur-agendamentos.firebaseapp.com",
+            projectId: "costur-agendamentos",
+            storageBucket: "costur-agendamentos.firebasestorage.app",
+            messagingSenderId: "948222283708",
+            appId: "1:948222283708:web:a82876883f247e51ede5b9"
+        };
+
+        // Inicializar Firebase
+        let db;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+            console.log("✅ Firebase inicializado com sucesso!");
+        } catch (error) {
+            console.error("❌ Erro ao inicializar Firebase:", error);
+        }
+
+        // ============================
+        // CONFIGURAÇÕES BÁSICAS
+        // ============================
+        let appointments = [];
+        let bookedDates = {};
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        const CLIENTE_FILTRO = "BEM QUERIDA";
+
+        // ============================
+        // FUNÇÕES DO FIREBASE (CORRIGIDAS)
+        // ============================
+
+        // Função para buscar agendamentos da BEM QUERIDA do Firebase
+        async function loadAppointmentsFromFirebase() {
+            console.log("🔥 Buscando agendamentos da BEM QUERIDA no Firebase...");
+            
+            try {
+                // VERSÃO SIMPLIFICADA: Buscar todos e filtrar depois
+                const snapshot = await db.collection('appointments').get();
+                
+                appointments = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // FILTRAR APENAS BEM QUERIDA LOCALMENTE
+                    if (data.clientName && data.clientName.toUpperCase() === CLIENTE_FILTRO.toUpperCase()) {
+                        appointments.push({ 
+                            id: doc.id, 
+                            ...data,
+                            estimatedDays: data.estimatedDays || 1
+                        });
+                    }
+                });
+                
+                // Ordenar por data (mais recente primeiro)
+                appointments.sort((a, b) => {
+                    const dateA = new Date(a.serviceDate || 0);
+                    const dateB = new Date(b.serviceDate || 0);
+                    return dateB - dateA;
+                });
+                
+                console.log(`✅ ${appointments.length} agendamentos da BEM QUERIDA encontrados`);
+                
+                // Atualizar interface
+                updateBookedDates();
+                loadAppointmentsList();
+                generateCalendar(currentMonth, currentYear);
+                
+            } catch (error) {
+                console.error("❌ Erro ao carregar agendamentos:", error);
+                showErrorMessage("Erro ao carregar agendamentos: " + error.message);
+            }
+        }
+
+        // ============================
+        // FUNÇÕES DO CALENDÁRIO
+        // ============================
+        function generateCalendar(month, year) {
+            try {
+                const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                document.getElementById('current-month').textContent = `${monthNames[month]} ${year}`;
+                
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const today = new Date();
+                const currentDay = today.getDate();
+                const currentMonthToday = today.getMonth();
+                const currentYearToday = today.getFullYear();
+                
+                const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+                let calendarHTML = '';
+                
+                dayNames.forEach(day => {
+                    calendarHTML += `<div class="calendar-day header">${day}</div>`;
+                });
+                
+                for (let i = 0; i < firstDay; i++) {
+                    calendarHTML += `<div class="calendar-day unavailable"></div>`;
+                }
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateKey = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    const currentDateObj = new Date(year, month, day);
+                    const todayObj = new Date();
+                    
+                    todayObj.setHours(0, 0, 0, 0);
+                    currentDateObj.setHours(0, 0, 0, 0);
+                    
+                    let dayClass = "calendar-day available";
+                    
+                    if (currentDateObj < todayObj) {
+                        dayClass = "calendar-day past-day";
+                    }
+                    
+                    if (bookedDates[dateKey]) {
+                        if (dayClass.includes("past-day")) {
+                            dayClass = "calendar-day past-day booked";
+                        } else {
+                            dayClass = "calendar-day booked";
+                        }
+                    }
+                    
+                    if (day === currentDay && month === currentMonthToday && year === currentYearToday) {
+                        dayClass = "calendar-day today";
+                    }
+                    
+                    calendarHTML += `<div class="${dayClass}" data-day="${day}" data-month="${month}" data-year="${year}">${day}</div>`;
+                }
+                
+                document.getElementById('calendar-days').innerHTML = calendarHTML;
+                
+            } catch (error) {
+                console.error("❌ Erro ao gerar calendário:", error);
+            }
+        }
+
+        // ============================
+        // FUNÇÕES AUXILIARES (CORRIGIDAS PARA DIAS CORRIDOS)
+        // ============================
+        function updateBookedDates() {
+            bookedDates = {};
+            
+            appointments.forEach((appointment) => {
+                if (appointment.status === 'active' || appointment.status === 'in-production' || 
+                    appointment.status === 'Agendado' || appointment.status === 'Em produção') {
+                    
+                    const start = new Date(appointment.serviceDate);
+                    const estimatedDays = appointment.estimatedDays || 1;
+                    
+                    // ✅ CORREÇÃO: Marcar TODOS os dias corridos (incluindo sábado e domingo)
+                    for (let i = 0; i < estimatedDays; i++) {
+                        const currentDate = new Date(start);
+                        currentDate.setDate(start.getDate() + i);
+                        const dateKey = currentDate.toISOString().split('T')[0];
+                        bookedDates[dateKey] = true;
+                    }
+                }
+            });
+            
+            console.log(`📌 ${Object.keys(bookedDates).length} datas ocupadas pela BEM QUERIDA`);
+        }
+
+        // ✅ CORREÇÃO: Função calcula dias corridos (não apenas dias úteis)
+        function calculateCompletionDate(startDate, estimatedDays) {
+            if (!startDate) return null;
+            
+            // Criar nova data a partir da data de início
+            let completionDate = new Date(startDate);
+            
+            // ✅ CORREÇÃO: Adicionar dias corridos diretamente
+            completionDate.setDate(completionDate.getDate() + estimatedDays);
+            
+            return completionDate;
+        }
+
+        function formatDate(date) {
+            if (!date) return '-';
+            
+            try {
+                const d = new Date(date);
+                if (isNaN(d.getTime())) return '-';
+                
+                // Formatar como DD/MM/YYYY
+                const day = d.getDate().toString().padStart(2, '0');
+                const month = (d.getMonth() + 1).toString().padStart(2, '0');
+                const year = d.getFullYear();
+                
+                return `${day}/${month}/${year}`;
+            } catch (error) {
+                return '-';
+            }
+        }
+
+        function showErrorMessage(message) {
+            const container = document.getElementById('appointments-list');
+            container.innerHTML = `
+                <div style="padding: 30px; text-align: center; color: #e74c3c;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <h3>Erro ao carregar dados</h3>
+                    <p>${message}</p>
+                    <button onclick="loadAppointmentsFromFirebase()" style="margin-top: 15px;">
+                        <i class="fas fa-redo"></i> Tentar novamente
+                    </button>
+                </div>
+            `;
+        }
+
+        // ============================
+        // FUNÇÃO PARA CARREGAR LISTA DE AGENDAMENTOS
+        // ============================
+        function loadAppointmentsList() {
+            const appointmentsContainer = document.getElementById('appointments-list');
+            
+            if (appointments.length === 0) {
+                appointmentsContainer.innerHTML = `
+                    <div style="padding: 30px; text-align: center; color: #666;">
+                        <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 15px; color: #ddd;"></i>
+                        <h3>Nenhum agendamento encontrado</h3>
+                        <p>Não há agendamentos para ${CLIENTE_FILTRO}.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let appointmentsHTML = '';
+            
+            appointments.forEach((appointment) => {
+                // Converter status para formato consistente
+                let status = appointment.status;
+                let statusClass = 'status-booked';
+                let statusText = 'Agendado';
+                
+                // Mapear status
+                if (status === 'Agendado' || status === 'active') {
+                    statusClass = 'status-booked';
+                    statusText = 'Agendado';
+                } else if (status === 'Em produção' || status === 'in-production') {
+                    statusClass = 'status-in-production';
+                    statusText = 'Em produção';
+                } else if (status === 'Realizado' || status === 'completed') {
+                    statusClass = 'status-completed';
+                    statusText = 'Realizado';
+                } else if (status === 'Cancelado' || status === 'cancelled') {
+                    statusClass = 'status-cancelled';
+                    statusText = 'Cancelado';
+                }
+                
+                // Formatar data de início
+                const startDate = new Date(appointment.serviceDate);
+                const formattedStartDate = formatDate(startDate);
+                
+                // ✅ CORREÇÃO: Calcular data de término com DIAS CORRIDOS
+                const completionDate = calculateCompletionDate(startDate, appointment.estimatedDays || 1);
+                const formattedCompletionDate = formatDate(completionDate);
+                
+                // Formatar hora
+                const serviceTime = appointment.serviceTime || '08:00';
+                
+                appointmentsHTML += `
+                    <div class="appointment-item" data-appointment-id="${appointment.id}">
+                        <div class="appointment-details">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                                <h4 style="margin: 0;">${appointment.clientName}</h4>
+                                <div class="appointment-status ${statusClass}">${statusText}</div>
+                            </div>
+                            <p><strong>Agendado por:</strong> ${appointment.scheduledBy || 'Não informado'}</p>
+                            <p><strong>Data de Início:</strong> ${formattedStartDate} às ${serviceTime}</p>
+                            <p><strong>Peças:</strong> ${appointment.quantity || 0} | <strong>Tipo:</strong> ${appointment.serviceType || 'Não informado'}</p>
+                            <p><strong>Previsão de Término:</strong> ${formattedCompletionDate}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            appointmentsContainer.innerHTML = appointmentsHTML;
+        }
+
+        // ============================
+        // INICIALIZAÇÃO
+        // ============================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Inicializando sistema para BEM QUERIDA (dias corridos)");
+            
+            // Carregar dados do Firebase
+            loadAppointmentsFromFirebase();
+            
+            // Configurar navegação do calendário
+            document.getElementById('prev-month').addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                generateCalendar(currentMonth, currentYear);
+            });
+            
+            document.getElementById('next-month').addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                generateCalendar(currentMonth, currentYear);
+            });
+            
+            // Escutar atualizações em tempo real (versão simplificada)
+            if (db) {
+                db.collection('appointments').onSnapshot((snapshot) => {
+                    console.log("🔄 Atualização em tempo real detectada");
+                    loadAppointmentsFromFirebase();
+                }, (error) => {
+                    console.error("❌ Erro no listener em tempo real:", error);
+                });
+            }
+        });
+
+        // ============================
+        // API PARA USO EXTERNO
+        // ============================
+        window.agendamentosBemQuerida = {
+            recarregarAgendamentos: function() {
+                loadAppointmentsFromFirebase();
+            },
+            
+            getAgendamentos: function() {
+                return appointments;
+            },
+            
+            getTotalAgendamentos: function() {
+                return appointments.length;
+            }
+        };
+
+    </script>
+
+    
     <div class="container">
         <!-- PAINEL DE ACOMPANHAMENTO BEM QUERIDA (NOVO) -->
         <section class="panel-section">
