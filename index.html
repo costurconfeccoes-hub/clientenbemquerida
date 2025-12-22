@@ -1287,7 +1287,92 @@
         const CLIENTE_FILTRO = "BEM QUERIDA";
 
         // ============================
-        // FUNÇÕES DO FIREBASE (CORRIGIDAS)
+        // FUNÇÕES AUXILIARES CORRIGIDAS
+        // ============================
+
+        // ✅ CORREÇÃO: Converter data do Firebase corretamente (resolvendo problema de fuso horário)
+        function parseFirebaseDate(dateString) {
+            if (!dateString) return null;
+            
+            try {
+                // Se a data já for um objeto Date
+                if (dateString instanceof Date) {
+                    return new Date(dateString);
+                }
+                
+                // Se for uma string no formato YYYY-MM-DD (do Firebase)
+                if (typeof dateString === 'string') {
+                    // Verificar se tem o formato YYYY-MM-DD
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                        // Adicionar horário no meio-dia UTC para evitar problemas de fuso horário
+                        return new Date(dateString + 'T12:00:00Z');
+                    }
+                    
+                    // Se for timestamp ou outro formato
+                    const date = new Date(dateString);
+                    if (!isNaN(date.getTime())) {
+                        return date;
+                    }
+                }
+                
+                // Se for timestamp do Firestore
+                if (dateString && dateString.toDate) {
+                    return dateString.toDate();
+                }
+                
+                console.warn("Formato de data não reconhecido:", dateString);
+                return null;
+            } catch (error) {
+                console.error("Erro ao converter data:", error, dateString);
+                return null;
+            }
+        }
+
+        // ✅ CORREÇÃO: Função para formatar data corretamente
+        function formatDate(date) {
+            if (!date) return '-';
+            
+            try {
+                const d = parseFirebaseDate(date);
+                if (!d || isNaN(d.getTime())) return '-';
+                
+                // Formatar como DD/MM/YYYY
+                const day = d.getDate().toString().padStart(2, '0');
+                const month = (d.getMonth() + 1).toString().padStart(2, '0');
+                const year = d.getFullYear();
+                
+                return `${day}/${month}/${year}`;
+            } catch (error) {
+                console.error("Erro ao formatar data:", error);
+                return '-';
+            }
+        }
+
+        // ✅ CORREÇÃO: Calcular data de término corretamente
+        function calculateCompletionDate(startDate, estimatedDays) {
+            if (!startDate) return null;
+            
+            try {
+                const start = parseFirebaseDate(startDate);
+                if (!start || isNaN(start.getTime())) return null;
+                
+                const estimated = estimatedDays || 1;
+                
+                // ✅ CORREÇÃO: Criar nova data e adicionar os dias
+                // Se começa no dia 1 e leva 1 dia → termina no dia 1
+                // Se começa no dia 1 e leva 3 dias → termina no dia 3
+                const completionDate = new Date(start);
+                completionDate.setDate(start.getDate() + (estimated - 1));
+                
+                return completionDate;
+            } catch (error) {
+                console.error("Erro ao calcular data de término:", error);
+                return null;
+            }
+        }
+
+        // ============================
+        // FUNÇÕES DO FIREBASE
         // ============================
 
         // Função para buscar agendamentos da BEM QUERIDA do Firebase
@@ -1295,7 +1380,7 @@
             console.log("🔥 Buscando agendamentos da BEM QUERIDA no Firebase...");
             
             try {
-                // VERSÃO SIMPLIFICADA: Buscar todos e filtrar depois
+                // Buscar todos e filtrar depois
                 const snapshot = await db.collection('appointments').get();
                 
                 appointments = [];
@@ -1313,8 +1398,8 @@
                 
                 // Ordenar por data (mais recente primeiro)
                 appointments.sort((a, b) => {
-                    const dateA = new Date(a.serviceDate || 0);
-                    const dateB = new Date(b.serviceDate || 0);
+                    const dateA = parseFirebaseDate(a.serviceDate) || new Date(0);
+                    const dateB = parseFirebaseDate(b.serviceDate) || new Date(0);
                     return dateB - dateA;
                 });
                 
@@ -1393,9 +1478,6 @@
             }
         }
 
-        // ============================
-        // FUNÇÕES AUXILIARES (CORRIGIDAS PARA DIAS CORRIDOS)
-        // ============================
         function updateBookedDates() {
             bookedDates = {};
             
@@ -1403,10 +1485,12 @@
                 if (appointment.status === 'active' || appointment.status === 'in-production' || 
                     appointment.status === 'Agendado' || appointment.status === 'Em produção') {
                     
-                    const start = new Date(appointment.serviceDate);
+                    const start = parseFirebaseDate(appointment.serviceDate);
+                    if (!start) return;
+                    
                     const estimatedDays = appointment.estimatedDays || 1;
                     
-                    // ✅ CORREÇÃO: Marcar TODOS os dias corridos (incluindo sábado e domingo)
+                    // ✅ CORREÇÃO: Usar a função parseFirebaseDate para datas consistentes
                     for (let i = 0; i < estimatedDays; i++) {
                         const currentDate = new Date(start);
                         currentDate.setDate(start.getDate() + i);
@@ -1417,37 +1501,6 @@
             });
             
             console.log(`📌 ${Object.keys(bookedDates).length} datas ocupadas pela BEM QUERIDA`);
-        }
-
-        // ✅ CORREÇÃO: Função calcula dias corridos (não apenas dias úteis)
-        function calculateCompletionDate(startDate, estimatedDays) {
-            if (!startDate) return null;
-            
-            // Criar nova data a partir da data de início
-            let completionDate = new Date(startDate);
-            
-            // ✅ CORREÇÃO: Adicionar dias corridos diretamente
-            completionDate.setDate(completionDate.getDate() + estimatedDays);
-            
-            return completionDate;
-        }
-
-        function formatDate(date) {
-            if (!date) return '-';
-            
-            try {
-                const d = new Date(date);
-                if (isNaN(d.getTime())) return '-';
-                
-                // Formatar como DD/MM/YYYY
-                const day = d.getDate().toString().padStart(2, '0');
-                const month = (d.getMonth() + 1).toString().padStart(2, '0');
-                const year = d.getFullYear();
-                
-                return `${day}/${month}/${year}`;
-            } catch (error) {
-                return '-';
-            }
         }
 
         function showErrorMessage(message) {
@@ -1504,11 +1557,11 @@
                     statusText = 'Cancelado';
                 }
                 
-                // Formatar data de início
-                const startDate = new Date(appointment.serviceDate);
+                // ✅ CORREÇÃO: Usar parseFirebaseDate para converter corretamente
+                const startDate = parseFirebaseDate(appointment.serviceDate);
                 const formattedStartDate = formatDate(startDate);
                 
-                // ✅ CORREÇÃO: Calcular data de término com DIAS CORRIDOS
+                // ✅ CORREÇÃO: Calcular data de término
                 const completionDate = calculateCompletionDate(startDate, appointment.estimatedDays || 1);
                 const formattedCompletionDate = formatDate(completionDate);
                 
@@ -1538,7 +1591,7 @@
         // INICIALIZAÇÃO
         // ============================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("🚀 Inicializando sistema para BEM QUERIDA (dias corridos)");
+            console.log("🚀 Inicializando sistema para BEM QUERIDA");
             
             // Carregar dados do Firebase
             loadAppointmentsFromFirebase();
@@ -1562,7 +1615,7 @@
                 generateCalendar(currentMonth, currentYear);
             });
             
-            // Escutar atualizações em tempo real (versão simplificada)
+            // Escutar atualizações em tempo real
             if (db) {
                 db.collection('appointments').onSnapshot((snapshot) => {
                     console.log("🔄 Atualização em tempo real detectada");
